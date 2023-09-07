@@ -11,6 +11,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from .HLL import get_quantities
+from numpy import min,max
 
 def plot(U,gamma,*args,**kwargs):
     # PLOT AS ANIMATION
@@ -20,7 +21,6 @@ def plot(U,gamma,*args,**kwargs):
     axE = fig.add_subplot(223)
     axV = fig.add_subplot(224)
     ax  = [axR,axP,axE,axV]
-    plt.tight_layout()
 
     axR.set_title('Density')
     axP.set_title('Pressure')
@@ -48,6 +48,8 @@ def plot(U,gamma,*args,**kwargs):
         showE, = axE.plot(e,c='orange',*args,*kwargs)
         showV, = axV.plot(V[0],c='red',*args,*kwargs)
 
+        plt.tight_layout()
+
     def update(frame):
         V,P,F,e,c = get_quantities(U[frame],gamma)
 
@@ -55,7 +57,9 @@ def plot(U,gamma,*args,**kwargs):
             showR.set_array(U[frame][0])
             showP.set_array(P)
             showE.set_array(e)
-            showV.set_array(sum([v**2 for v in V])**0.5)
+            vv = sum([v**2 for v in V])**0.5
+            showV.set_array(vv)
+            showV.set(clim=(min(vv),max(vv)))
 
         if len(V) == 1:
             MAX = max(U[frame][0]), max(P), max(e), max(V[0])
@@ -74,5 +78,5 @@ def plot(U,gamma,*args,**kwargs):
 
         return showR,showP,showE,showV
 
-    animation = FuncAnimation(fig=fig,func=update, frames=len(U), interval=1,blit=len(V)==2)
+    animation = FuncAnimation(fig=fig, func=update, frames=len(U), interval=1, blit=len(V)==2)
     return fig,ax,animation
