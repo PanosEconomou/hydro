@@ -3,8 +3,10 @@ from solver import *
 
 # Import other cuties
 import argparse
-from tqdm.notebook import tqdm
+from tqdm.auto import tqdm
+from os.path import join, isdir, exists, isfile
 from numpy import ogrid, sqrt
+from matplotlib.animation import FFMpegWriter
 
 # Create a parser for the parguments
 parser = argparse.ArgumentParser(
@@ -12,13 +14,13 @@ parser = argparse.ArgumentParser(
 )
 
 # Add useful arguments for the simulation
-parser.add_argument('-n','--n_points',default=100,help='Number of points per axis')
-parser.add_argument('-L','--length',default=1,help='Length in Meters')
-parser.add_argument('-g','--gamma',default=1.4,help='Adiabatic constant of fluid')
-parser.add_argument('-T','--dt',default=0.001,help='Timestep')
+parser.add_argument('-n','--n_points',default=100,help='Number of points per axis',type=int)
+parser.add_argument('-L','--length',default=1,help='Length in Meters',type=float64)
+parser.add_argument('-g','--gamma',default=1.4,help='Adiabatic constant of fluid',type=float64)
+parser.add_argument('-T','--dt',default=0.001,help='Timestep',type=float64)
 parser.add_argument('-S','--shape',choices=['circle','square','offset_square'],default='circle',help='What is the shape of the discontinuity')
-parser.add_argument('-P','--pressure',default=10,help='Pressure peak of the shockwave')
-parser.add_argument('-F','--frames',default=500,help='Number of timesteps for the simulation')
+parser.add_argument('-P','--pressure',default=10,help='Pressure peak of the shockwave',type=float64)
+parser.add_argument('-F','--frames',default=500,help='Number of timesteps for the simulation',type=int)
 parser.add_argument('-o','--output',default=None,help='The file to output')
 
 
@@ -72,4 +74,17 @@ for i in tqdm(range(args.frames),desc='Solving...'): U.append(step(U[-1], dt, HL
 
 # After we solve we just need to plot
 fig,ax,animation = plot(U,gamma)
+
+if args.output is not None: 
+    filename = args.output
+    if '.mp4' not in filename:
+        if isdir(filename) and exists(filename):
+            join(filename,'output.mp4')
+        if isfile(filename):
+            filename+='.mp4'
+
+    FFwriter = FFMpegWriter(fps=50)
+    animation.save(filename,writer=FFwriter)
+
+
 plt.show()
