@@ -7,7 +7,7 @@
 # estimates the HLL solution    #
 #################################
 
-from grid import grid
+from .grid import grid
 from numpy import array, roll, float64, maximum, zeros
 
 # Calculate the left boundary
